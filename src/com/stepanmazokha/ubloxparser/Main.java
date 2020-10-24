@@ -43,7 +43,7 @@ public class Main {
                     NavPvtMessage message = rtk.readMessage();
                     if (message == null) continue;
 
-                    System.out.print(message.toCsvRow());
+                    System.out.println(message.toCsvRow());
                     logger.log(message.toCsvRow());
                 }
             } else {
