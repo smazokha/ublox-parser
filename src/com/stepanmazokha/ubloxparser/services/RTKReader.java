@@ -101,7 +101,7 @@ public class RTKReader {
         pvt.tAccNs = readInt(stream); // time accuracy estimate (UTC), ns
         skip(stream, 4); // byte[] nano = readBytes(serial, 4);
         pvt.fixType = readFixType(stream);
-        skip(stream, 1); // byte[] flags = readBytes(serial, 1);
+        parseFlags(stream.read(), pvt); // Fix status flags
         skip(stream, 1); // byte[] flags2 = readBytes(serial, 1);
         pvt.numSV = stream.read(); // Number of satellites used in Nav Solution
         pvt.lngDeg = readInt(stream) * 1e-7; // deg
@@ -172,5 +172,27 @@ public class RTKReader {
 
     private void skip(InputStream in, int lengthBytes) throws IOException {
         readBytes(in, lengthBytes);
+    }
+
+    private int bitAt(int value, int index) {
+        if (index >= 0 && index < 8) {
+            return (value >> index) & 1;
+        } else return -1;
+    }
+
+    private void parseFlags(int flags, NavPvtMessage pvt) {
+        pvt.gnssFixOk = (flags & 1) == 1; // field: gnssFixOk
+        switch ((flags >> 6) & 3) { // field: carrSoln (last two bits)
+            case 0:
+                pvt.carrierSolution = NavPvtMessage.CarrierSolution.None;
+                break;
+            case 1:
+                pvt.carrierSolution = NavPvtMessage.CarrierSolution.Float;
+                break;
+            case 2:
+                pvt.carrierSolution = NavPvtMessage.CarrierSolution.Fix;
+                break;
+            default:break;
+        }
     }
 }

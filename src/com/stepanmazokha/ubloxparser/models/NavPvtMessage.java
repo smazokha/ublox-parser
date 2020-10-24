@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 public class NavPvtMessage {
+
     public enum FixType {
         NoFix,
         DeadReckoning,
@@ -14,6 +15,14 @@ public class NavPvtMessage {
         Undefined;
     }
 
+    public enum CarrierSolution {
+        None,
+        Float,
+        Fix
+    }
+
+    public boolean gnssFixOk;
+    public CarrierSolution carrierSolution;
     public FixType fixType;
     public double latDeg;
     public double lngDeg;
@@ -39,11 +48,11 @@ public class NavPvtMessage {
     }
 
     public static String getCsvHeaders() {
-        return "Fix\tTime (millis)\tLat\tLng\tNum of Sats\tHeight (m)\tHeight MSL (m)\tTime Accuracy (ns)\tVertical Accuracy (m)\tHorizontal Accuracy (m)\tDoP";
+        return "Gnss Fix OK\tFix\tCarr. Sol.\tTime (millis)\tLat\tLng\tNum of Sats\tHeight (m)\tHeight MSL (m)\tTime Accuracy (ns)\tVertical Accuracy (m)\tHorizontal Accuracy (m)\tDoP";
     }
 
     public String toCsvRow() {
-        return fixType.toString() + "\t" + time + "\t" + latDeg + "\t" + lngDeg + "\t" + numSV + "\t" + heightMm / 1000. + "\t" + heightMslMm / 1000. + "\t" + tAccNs + "\t" + vAccMm / 1000. + "\t" + hAccMm / 1000. + "\t" + pDop;
+        return (gnssFixOk ? "YES" : "NO") + "\t" + fixType.toString() + "\t" + carrierSolution.toString() + "\t" + time + "\t" + latDeg + "\t" + lngDeg + "\t" + numSV + "\t" + heightMm / 1000. + "\t" + heightMslMm / 1000. + "\t" + tAccNs + "\t" + vAccMm / 1000. + "\t" + hAccMm / 1000. + "\t" + pDop;
     }
 
     @Override
