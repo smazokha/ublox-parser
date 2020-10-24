@@ -7,8 +7,8 @@ import com.stepanmazokha.ubloxparser.services.LogWriter;
 public class Main {
 
     private static final int BAUD_RATE = 9600;
-    private static final String MAC_PORT_NAME = "tty.usbmodem";
-    private static final String MAC_LOG_FILE = "/Users/stepanmazokha/Desktop/logs/";
+    private static final String MAC_PORT_NAME = "COM14";//"tty.usbmodem";
+    private static final String MAC_LOG_FILE = "C://Users/Stepan/Desktop/Logs/";//"/Users/stepanmazokha/Desktop/logs/";
 
     /**
      * Expected args:
@@ -43,8 +43,7 @@ public class Main {
                     NavPvtMessage message = rtk.readMessage();
                     if (message == null) continue;
 
-                    //System.out.println(message.toString());
-                    System.out.println(message.toCsvRow());
+                    System.out.print(message.toCsvRow());
                     logger.log(message.toCsvRow());
                 }
             } else {

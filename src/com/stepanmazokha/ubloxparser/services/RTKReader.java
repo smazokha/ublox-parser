@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * A parser of u-Blox UBX-NAV-PVT message.

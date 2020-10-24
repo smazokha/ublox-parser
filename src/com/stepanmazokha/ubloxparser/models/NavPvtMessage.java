@@ -39,15 +39,15 @@ public class NavPvtMessage {
     }
 
     public static String getCsvHeaders() {
-        return "Fix\tTime (millis)\tLat\tLng\tNum of Sats\tHeight (m)\tHeight MSL (m)\nTime Accuracy (ns)\nVertical Accuracy (mm)\nHorizontal Accuracy (mm)\nDoP";
+        return "Fix\tTime (millis)\tLat\tLng\tNum of Sats\tHeight (m)\tHeight MSL (m)\tTime Accuracy (ns)\tVertical Accuracy (mm)\tHorizontal Accuracy (mm)\tDoP";
     }
 
     public String toCsvRow() {
-        return fixType.toString() + "\t" + time + "\t" + latDeg + "\t" + lngDeg + "\t" + numSV + "\t" + heightMm / 1000. + "\t" + heightMslMm / 1000. + "\t" + tAccNs + "\t" + vAccMm + "\t" + hAccMm + "\t" + pDop + "\n";
+        return fixType.toString() + "\t" + time + "\t" + latDeg + "\t" + lngDeg + "\t" + numSV + "\t" + heightMm / 1000. + "\t" + heightMslMm / 1000. + "\t" + tAccNs + "\t" + vAccMm / 1000. + "\t" + hAccMm / 1000. + "\t" + pDop + "\n";
     }
 
     @Override
     public String toString() {
-        return fixType.toString() + " " + latDeg + " " + lngDeg + " [" + numSV + "] " + "(" + vAccMm / 1000. + " m, " + hAccMm / 1000. + " m) ";
+       return this.toCsvRow();
     }
 }
