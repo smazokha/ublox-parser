@@ -13,7 +13,7 @@ import java.util.TimeZone;
 /**
  * A parser of u-Blox UBX-NAV-PVT message.
  * Documentation: https://www.u-blox.com/sites/default/files/products/documents/u-blox8-M8_ReceiverDescrProtSpec_%28UBX-13003221%29.pdf
- * Page: 332
+ * Page: 332 (in the book), 346 (in PDF)
  */
 public class RTKReader {
 
@@ -91,26 +91,27 @@ public class RTKReader {
         if (length != PVT_PAYLOAD_LENGTH) return null;
 
         // PAYLOAD     [LENGTH bytes]
-        int iTOW = readInt(stream);
-        int year = readShort(stream);
-        int month = stream.read();
-        int day = stream.read();
-        int hour = stream.read();
-        int min = stream.read();
-        int sec = stream.read();
-        pvt.time = parseTime(year, month, day, hour, min, sec);
+        pvt.towMs = readInt(stream); // GPS time of week of the navigation epoch
+        pvt.setTime(
+                readShort(stream), /* year */
+                stream.read(), /* month */
+                stream.read(), /* day */
+                stream.read(), /* hour */
+                stream.read(), /* minute */
+                stream.read()); /* second */
         skip(stream, 1); // byte[] valid = readBytes(serial, 1);
-        skip(stream, 4); // byte[] tAcc = readBytes(serial, 4);
+        pvt.tAccNs = readInt(stream); // time accuracy estimate (UTC), ns
         skip(stream, 4); // byte[] nano = readBytes(serial, 4);
         pvt.fixType = readFixType(stream);
         skip(stream, 1); // byte[] flags = readBytes(serial, 1);
         skip(stream, 1); // byte[] flags2 = readBytes(serial, 1);
-        pvt.numSV = stream.read();
-        pvt.lng = readInt(stream) * 1e-7; // deg
-        pvt.lat = readInt(stream) * 1e-7; // deg
-        pvt.height = readInt(stream); // mm
-        pvt.heightMSL = readInt(stream); // mm
-        skip(stream, 4); // int hAcc = readInt(serial, 4); // mm/s
+        pvt.numSV = stream.read(); // Number of satellites used in Nav Solution
+        pvt.lngDeg = readInt(stream) * 1e-7; // deg
+        pvt.latDeg = readInt(stream) * 1e-7; // deg
+        pvt.heightMm = readInt(stream); // mm
+        pvt.heightMslMm = readInt(stream); // mm
+        pvt.hAccMm = readInt(stream); // horizontal accuracy estimate, mm
+        pvt.vAccMm = readInt(stream); // vertical accuracy estimate, mm
         skip(stream, 4); // int velN = readInt(serial, 4); // mm/s
         skip(stream, 4); // int velE = readInt(serial, 4); // mm/s
         skip(stream, 4); // int velD = readInt(serial, 4); // mm/s
@@ -118,25 +119,17 @@ public class RTKReader {
         skip(stream, 4); // byte[] heatMot = readBytes(serial, 4);
         skip(stream, 4); // byte[] sAcc = readBytes(serial, 4);
         skip(stream, 4); // byte[] headAcc = readBytes(serial, 4);
-        skip(stream, 2); // byte[] pDOP = readBytes(serial, 2);
+        pvt.pDop = readShort(stream) * 0.01; // dilution of precision, scaling: 0.01
         skip(stream, 1); // byte[] flags3 = readBytes(serial, 1);
-        skip(stream, 5); // byte[] reserved1 = readBytes(serial, 5);
+        skip(stream, 5); // reserved
         skip(stream, 4); // byte[] headVeh = readBytes(serial, 4);
         skip(stream, 2); // byte[] macDec = readBytes(serial, 2);
-        skip(stream, 2); // byte[] macAcc = readBytes(serial, 2);
+        pvt.macAccDeg = readShort(stream) * 1e-2; // Magnetic declination accuracy, deg
 
         // CHECKSUM    [2 bytes]
         byte[] checksum = readBytes(stream, 2);
 
         return pvt;
-    }
-
-    /** Parse message time, assuming that it's given in UTC. */
-    private long parseTime(int year, int month, int day, int hour, int minute, int second) {
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        time.set(year, month - 1, day, hour, minute, second);
-        time.set(Calendar.MILLISECOND, 0);
-        return time.getTimeInMillis();
     }
 
     private int readShort(InputStream in) throws IOException {

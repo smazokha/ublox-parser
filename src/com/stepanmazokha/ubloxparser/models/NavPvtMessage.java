@@ -1,5 +1,8 @@
 package com.stepanmazokha.ubloxparser.models;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 public class NavPvtMessage {
     public enum FixType {
         NoFix,
@@ -12,23 +15,39 @@ public class NavPvtMessage {
     }
 
     public FixType fixType;
-    public double lat;
-    public double lng;
-    public int height;
-    public int heightMSL;
+    public double latDeg;
+    public double lngDeg;
+    public int heightMm;
+    public int heightMslMm;
     public int numSV;
-    public long time;
+    public long towMs;
+    private long time;
+    public long tAccNs;
+    public long vAccMm;
+    public long hAccMm;
+    public double pDop;
+    public double macAccDeg;
 
-    @Override
-    public String toString() {
-        return fixType.toString() + " " + lat + " " + lng + " [" + numSV + "]";
-    }
-
-    public String toCsvRow() {
-        return fixType.toString() + "\t" + time + "\t" + lat + "\t" + lng + "\t" + numSV + "\t" + height + "\t" + heightMSL;
+    /**
+     * Parse message time, assuming that it's given in UTC.
+     */
+    public void setTime(int year, int month, int day, int hour, int minute, int second) {
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        time.set(year, month - 1, day, hour, minute, second);
+        time.set(Calendar.MILLISECOND, 0);
+        this.time = time.getTimeInMillis();
     }
 
     public static String getCsvHeaders() {
-        return "Fix\tTime (millis)\tLat\tLng\tNum of Sats\tHeight\tHeight MSL";
+        return "Fix\tTime (millis)\tLat\tLng\tNum of Sats\tHeight (m)\tHeight MSL (m)\nTime Accuracy (ns)\nVertical Accuracy (mm)\nHorizontal Accuracy (mm)\nDoP";
+    }
+
+    public String toCsvRow() {
+        return fixType.toString() + "\t" + time + "\t" + latDeg + "\t" + lngDeg + "\t" + numSV + "\t" + heightMm / 1000. + "\t" + heightMslMm / 1000. + "\t" + tAccNs + "\t" + vAccMm + "\t" + hAccMm + "\t" + pDop + "\n";
+    }
+
+    @Override
+    public String toString() {
+        return fixType.toString() + " " + latDeg + " " + lngDeg + " [" + numSV + "] " + "(" + vAccMm / 1000. + " m, " + hAccMm / 1000. + " m) ";
     }
 }

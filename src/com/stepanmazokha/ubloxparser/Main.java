@@ -37,12 +37,14 @@ public class Main {
         try {
             if (rtk.open()) {
                 logger.log(NavPvtMessage.getCsvHeaders());
+                System.out.println(NavPvtMessage.getCsvHeaders());
 
                 while (true) {
                     NavPvtMessage message = rtk.readMessage();
                     if (message == null) continue;
 
-                    System.out.println(message.toString());
+                    //System.out.println(message.toString());
+                    System.out.println(message.toCsvRow());
                     logger.log(message.toCsvRow());
                 }
             } else {
